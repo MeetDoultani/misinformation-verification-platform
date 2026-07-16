@@ -1,0 +1,11 @@
+flowchart TD
+    A[FusionResult + ReasoningRecord chain] --> B{Confidence threshold met?}
+    B -- No --> C[standardized_verdict_category = unverifiable]
+    B -- Yes --> D{conflict_detected?}
+    D -- Yes --> E[Apply conflict-resolution PolicyRules]
+    D -- No --> F[Apply standard PolicyRules]
+    E --> G[Determine standardized_verdict_category]
+    F --> G
+    C --> H[Emit DecisionRecord + ReasoningRecord entries]
+    G --> H
+    H --> I[Pass to Explainability Engine]

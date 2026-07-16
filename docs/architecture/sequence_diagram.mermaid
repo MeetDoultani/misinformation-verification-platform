@@ -1,0 +1,55 @@
+sequenceDiagram
+    actor User
+    participant IN as Input Normalizer
+    participant CE as Claim Extraction
+    participant LA as Linguistic Analysis
+    participant ER as Evidence Retrieval
+    participant KR as Knowledge Representation
+    participant NLI as NLI Verification
+    participant IF as Image Forensics
+    participant AID as AI-Text Detection
+    participant FI as Fusion Intelligence
+    participant EE as Explainability Engine
+
+    User->>IN: Submit input (text/image/URL)
+    IN->>CE: RawInput
+    CE->>CE: Segment + classify claims
+    CE-->>FI: Claim tagged not_checkable (skips analysis)
+
+    par Per-claim parallel analysis
+        CE->>LA: Claim
+        LA-->>FI: LinguisticAnalysisResult
+    and
+        CE->>AID: Claim.text
+        AID-->>FI: AITextDetectionResult
+    and
+        CE->>ER: Claim
+        ER->>ER: Query evidence corpus (tier 1/2/3)
+        alt Evidence found
+            ER-->>KR: Claim, EvidenceRecord[]
+            KR-->>NLI: KnowledgeAssertion[]
+            ER-->>NLI: EvidenceRecord[]
+            NLI->>NLI: Compute per-evidence stance
+            NLI-->>FI: VerificationResult (stance, confidence)
+        else No evidence found
+            ER-->>FI: EvidenceRecord[] empty, status=insufficient_data
+            NLI-->>FI: VerificationResult (not_enough_info)
+        end
+    and
+        CE->>IF: Associated ImageRecord (if present)
+        IF-->>FI: ImageForensicsResult
+    end
+
+    FI->>FI: Apply fusion rules
+    alt Signals agree
+        FI->>FI: Emit ReasoningRecord chain
+        FI-->>EE: FusionResult (conflict_detected=false)
+    else Signals conflict
+        FI->>FI: Flag conflict, apply conflict handling
+        FI-->>EE: FusionResult (conflict_detected=true)
+    end
+
+    EE->>EE: Render reasoning chain to prose
+    EE-->>User: Verdict + Explanation
+
+    Note over CE,EE: Repeated independently for every extracted Claim

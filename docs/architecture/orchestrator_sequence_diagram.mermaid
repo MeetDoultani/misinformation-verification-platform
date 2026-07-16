@@ -1,0 +1,38 @@
+sequenceDiagram
+    actor User
+    participant ORCH as Pipeline Orchestrator
+    participant CE as Claim Extraction
+    participant PAR as Parallel Analysis Modules
+    participant FI as Fusion Intelligence
+    participant DE as Decision Engine
+    participant EE as Explainability Engine
+
+    User->>ORCH: Submit input
+    ORCH->>ORCH: Create PipelineRun (status=running)
+    ORCH->>CE: Invoke (attempt 1)
+    alt Claim Extraction succeeds
+        CE-->>ORCH: Claim[] + ModuleExecutionRecord(succeeded)
+    else Claim Extraction fails
+        CE-->>ORCH: error + ModuleExecutionRecord(failed)
+        ORCH->>CE: Retry (attempt 2)
+        alt Retry succeeds
+            CE-->>ORCH: Claim[]
+        else Retries exhausted
+            ORCH->>ORCH: PipelineRun.status = failed
+            ORCH-->>User: System error (not a Verdict)
+        end
+    end
+
+    loop For each Claim
+        ORCH->>PAR: Invoke applicable modules in parallel
+        PAR-->>ORCH: Module outputs + ModuleExecutionRecords (some may be status=error/skipped)
+        ORCH->>FI: Invoke with all collected outputs for this claim
+        FI-->>ORCH: FusionResult + ReasoningRecord[]
+        ORCH->>DE: Invoke with FusionResult + ReasoningRecord[]
+        DE-->>ORCH: DecisionRecord + extended ReasoningRecord[]
+        ORCH->>EE: Invoke with DecisionRecord + ReasoningRecord[]
+        EE-->>ORCH: Explanation + Verdict
+    end
+
+    ORCH->>ORCH: PipelineRun.status = completed (or partial_failure)
+    ORCH-->>User: Verdict(s) + Explanation(s) + document-level summary
