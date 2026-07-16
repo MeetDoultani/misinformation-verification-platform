@@ -1,0 +1,25 @@
+# =============================================================================
+# paths.yaml
+# All filesystem locations used by the pipeline. Kept separate from dataset
+# definitions and preprocessing parameters so a path can be relocated (e.g.
+# for a different machine/mount) without touching dataset or cleaning logic.
+# All paths are relative to the project root.
+# =============================================================================
+
+raw_dir: "data/raw"
+interim_dir: "data/interim"
+processed_dir: "data/processed"
+splits_dir: "data/splits"
+
+# Placeholder corpus for future retrieval-augmented claim verification
+# (see docs/evidence_corpus.md). Not populated by this phase.
+evidence_corpus_dir: "data/evidence_corpus"
+
+# Per-dataset lineage/version manifests (see docs/lineage.md)
+lineage_dir: "data/processed/_lineage"
+
+reports_dir: "reports"
+eda_dir: "reports/eda"
+figures_dir: "reports/figures"
+profiling_dir: "reports/profiling"
+logs_dir: "reports/logs"

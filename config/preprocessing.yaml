@@ -1,0 +1,24 @@
+# =============================================================================
+# preprocessing.yaml
+# Parameters for the cleaning and splitting stages. Separated from
+# datasets.yaml so cleaning behavior (e.g. length thresholds, split ratios)
+# can be tuned without touching dataset source definitions.
+# =============================================================================
+
+cleaning:
+  min_text_length: 3           # chars, below this a row is dropped
+  max_text_length: 100000      # chars, above this a row is truncated/flagged
+  drop_duplicates_on: ["text"]
+  language_filter: null        # e.g. "en" to keep only English rows; null disables
+
+splitting:
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  random_seed: 42
+  stratify: true
+
+# Pipeline/schema version stamped into every processed row and lineage
+# manifest (see docs/lineage.md). Bump this whenever cleaning logic changes
+# in a way that would produce different output for the same raw input.
+pipeline_version: "1.1.0"

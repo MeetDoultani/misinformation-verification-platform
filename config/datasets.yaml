@@ -1,0 +1,87 @@
+# =============================================================================
+# datasets.yaml
+# Registry of every dataset the pipeline knows about. This is the single
+# source of truth consumed by DatasetManager (src/registry/dataset_manager.py).
+# Adding a new dataset = adding an entry here + a loader/normalizer pair in
+# src/cleaning/schema_normalization.py — nothing else needs to change.
+#
+# Fields:
+#   name            human-readable dataset name
+#   modality        one of: article | claim | image   (maps to canonical schema, see docs/canonical_schema.md)
+#   task            ML task identifier (fake_news, claim_verification, fact_checking,
+#                   ai_text_detection, image_forensics)
+#   source          "kaggle" (gated, manual/CLI) or "url" (direct automated download)
+#   dataset_version pinned version/release identifier used for lineage tracking.
+#                   For datasets without an official version tag, this is the
+#                   date this pipeline's URLs/slugs were last verified.
+#   raw_subdir      where raw files land, relative to project root
+#   expected_files  files checked to decide "already downloaded"
+#   label_map       raw label value -> canonical integer label
+# =============================================================================
+
+fake_real_news:
+  name: "ISOT Fake and Real News Dataset"
+  modality: "article"
+  task: "fake_news"
+  source: "kaggle"
+  kaggle_slug: "clmentbisaillon/fake-and-real-news-dataset"
+  dataset_version: "kaggle-snapshot-2017"
+  raw_subdir: "data/raw/fake_real_news"
+  expected_files: ["Fake.csv", "True.csv"]
+  label_map: {"Fake": 0, "True": 1}
+
+claim_verification:
+  name: "FEVER (Fact Extraction and VERification)"
+  modality: "claim"
+  task: "claim_verification"
+  source: "url"
+  urls:
+    train: "https://fever.ai/download/fever/train.jsonl"
+    val: "https://fever.ai/download/fever/paper_dev.jsonl"
+    test: "https://fever.ai/download/fever/paper_test.jsonl"
+  dataset_version: "fever1.0-2018"
+  raw_subdir: "data/raw/claim_verification"
+  label_map: {"SUPPORTS": 1, "REFUTES": 0, "NOT ENOUGH INFO": 2}
+
+fact_checking:
+  name: "LIAR Dataset"
+  modality: "claim"
+  task: "fact_checking"
+  source: "url"
+  url: "https://www.cs.ucsb.edu/~william/data/liar_dataset.zip"
+  dataset_version: "liar-2017-wang"
+  raw_subdir: "data/raw/fact_checking"
+  label_map:
+    "pants-fire": 0
+    "false": 1
+    "barely-true": 2
+    "half-true": 3
+    "mostly-true": 4
+    "true": 5
+
+image_forensics:
+  name: "CIFAKE: Real and AI-Generated Synthetic Images"
+  modality: "image"
+  task: "image_forensics"
+  source: "kaggle"
+  kaggle_slug: "birdy654/cifake-real-and-ai-generated-synthetic-images"
+  dataset_version: "kaggle-snapshot-2023"
+  raw_subdir: "data/raw/image_forensics"
+  label_map: {"REAL": 1, "FAKE": 0}
+
+ai_text_detection:
+  name: "GPT-2 Output Dataset (OpenAI)"
+  modality: "article"
+  task: "ai_text_detection"
+  source: "url"
+  base_url: "https://openaipublic.azureedge.net/gpt-2/output-dataset/v1"
+  files:
+    - "webtext.train.jsonl"
+    - "webtext.valid.jsonl"
+    - "webtext.test.jsonl"
+    - "small-117M.train.jsonl"
+    - "small-117M.valid.jsonl"
+    - "small-117M.test.jsonl"
+  dataset_version: "gpt2-output-v1"
+  raw_subdir: "data/raw/ai_text_detection"
+  label_map: {"human": 1, "machine": 0}

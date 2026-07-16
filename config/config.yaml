@@ -1,0 +1,78 @@
+# =============================================================================
+# Global configuration for the Data Engineering pipeline
+# =============================================================================
+
+paths:
+  raw_dir: "data/raw"
+  interim_dir: "data/interim"
+  processed_dir: "data/processed"
+  splits_dir: "data/splits"
+  reports_dir: "reports"
+  eda_dir: "reports/eda"
+  figures_dir: "reports/figures"
+
+datasets:
+  fake_real_news:
+    name: "ISOT Fake and Real News Dataset"
+    source: "kaggle"                     # requires manual download, see docs/datasets.md
+    kaggle_slug: "clmentbisaillon/fake-and-real-news-dataset"
+    raw_subdir: "data/raw/fake_real_news"
+    expected_files: ["Fake.csv", "True.csv"]
+    label_map: {"Fake": 0, "True": 1}
+
+  claim_verification:
+    name: "FEVER (Fact Extraction and VERification)"
+    source: "url"
+    urls:
+      train: "https://fever.ai/download/fever/train.jsonl"
+      val: "https://fever.ai/download/fever/paper_dev.jsonl"
+      test: "https://fever.ai/download/fever/paper_test.jsonl"
+    raw_subdir: "data/raw/claim_verification"
+    label_map: {"SUPPORTS": 1, "REFUTES": 0, "NOT ENOUGH INFO": 2}
+
+  fact_checking:
+    name: "LIAR Dataset"
+    source: "url"
+    url: "https://www.cs.ucsb.edu/~william/data/liar_dataset.zip"
+    raw_subdir: "data/raw/fact_checking"
+    label_map:
+      "pants-fire": 0
+      "false": 1
+      "barely-true": 2
+      "half-true": 3
+      "mostly-true": 4
+      "true": 5
+
+  image_forensics:
+    name: "CIFAKE: Real and AI-Generated Synthetic Images"
+    source: "kaggle"                     # requires manual download, see docs/datasets.md
+    kaggle_slug: "birdy654/cifake-real-and-ai-generated-synthetic-images"
+    raw_subdir: "data/raw/image_forensics"
+    label_map: {"REAL": 1, "FAKE": 0}
+
+  ai_text_detection:
+    name: "GPT-2 Output Dataset (OpenAI)"
+    source: "url"
+    base_url: "https://openaipublic.azureedge.net/gpt-2/output-dataset/v1"
+    files:
+      - "webtext.train.jsonl"
+      - "webtext.valid.jsonl"
+      - "webtext.test.jsonl"
+      - "small-117M.train.jsonl"
+      - "small-117M.valid.jsonl"
+      - "small-117M.test.jsonl"
+    raw_subdir: "data/raw/ai_text_detection"
+    label_map: {"human": 1, "machine": 0}
+
+splitting:
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  random_seed: 42
+  stratify: true
+
+cleaning:
+  min_text_length: 3          # chars, below this a row is dropped
+  max_text_length: 100000      # chars, above this a row is truncated/flagged
+  drop_duplicates_on: ["text"]
+  language_filter: null        # e.g. "en" to keep only English rows; null disables
